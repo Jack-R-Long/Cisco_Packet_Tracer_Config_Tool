@@ -10,6 +10,7 @@ class Device:
         self.dist_switch = False
         self.access_switch = False
         self.vlans = []
+        self.globalConfigs = {}
     
     def assignVlans(self, vlanList):
         '''
@@ -36,15 +37,17 @@ def main():
         return
 
     # Read csv data
-    devices, vlans = readCSV(sys.argv[1])
+    devices, vlans, globalConfigs= readCSV(sys.argv[1])
 
     # Create devices
     deviceList = createDevices(devices)
     
-    # Assign vlan ips
+    # Assign vlan ips and global config
     for device in deviceList:
         device.assignVlans(vlans)
-    print(deviceList[1].vlans)
+        device.globalConfigs = globalConfigs
+
+    # Create script
 
     # Get initial network design
     # numRouters = userInputInt("Number of core routers (2911s):")
@@ -74,6 +77,7 @@ def readCSV(filename):
         reader = csv.reader(csvfile)
         line_count = 0
         vlans = []
+        globalConfigs = {}
         for row in reader:
             # First row
             if line_count == 0:
@@ -81,10 +85,13 @@ def readCSV(filename):
             # VLANs
             elif line_count < 14 and row[1] != '':
                 vlans.append(row)
+            # Global data 
+            elif row[0] != '':
+                globalConfigs[row[0]] = row[1]
 
             line_count += 1
         
-        return devices, vlans
+        return devices, vlans, globalConfigs
 
 
 def userInputInt(prompt, min = 1, max = 10):
@@ -125,43 +132,6 @@ def createDevices(deviceList):
         listOut.append(deviceObject)
         columnIndex += 1
     return listOut
-
-
-def getGlobalConfigs():
-    '''
-    Get global configs for all devices
-    '''
-    print("\n\nInput global configs for all devices\n")
-    globalConfigs = {
-        'secretPass' : '',
-        'bannerMOTD' : '',
-        'ipDomain' : '',
-        'consolePass' : '',
-        'mgmtVLAN#' : 1,
-        'mgmtNetworkID' : '',
-        'mgmtVLANMask': '',
-        'shutdownVlan#' : 999,
-        'sshUserName': '',
-        'sshSecret' : '',
-        'sshKeyBitModulus' : 1024,
-        'vtpDomain' : '',
-        'vtpPassword': '',
-    }
-    for key in globalConfigs:
-        globalConfigs[key] = input(f"{key}: ")
-    return globalConfigs
-
-def getVLANs():
-    '''
-    Get VLAN data
-    '''
-    numVLANs = userInputInt("\n*********\nVLAN Config\nNumber of VLANs: ")
-    vlanDict = {}
-    for num in range(1, 1 + numVLANs):
-        vlanName = input(f"Name of VLAN {num}: ")
-        subnet = input(f"{vlanName} subnet (ex: 10.1.1.1): ")
-        vlanDict[vlanName] = subnet
-    return vlanDict
 
 
 def configDistSwitch(distSwitchList, globalConfigs, vlanDict):
