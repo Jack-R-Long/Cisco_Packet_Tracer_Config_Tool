@@ -1,0 +1,31 @@
+VLAN ID,VLAN Name,Subnet,CIDR (Subnet Mask),AS01,AS02,AS03,DS01,DS02,R01,R02
+111,Shutdown,,,,,,,,,
+101,Space Force1,112.11.22.128,/25 (255.255.255.128),,,,.132,.133,.130,.131
+33,Cyber-Warrior,122.32.45.0,/24 (255.255.255.0),,,,.4,.5,.2,.3
+6,1961 CG,147.102.45.0,/24 (255.255.255.0),,,,.4,.5,.2,.3
+3,2130 CS,196.94.123.64,/26 (255.255.255.192),,,,.68,.69,.66,.67
+12,606 ACS,202.211.45.128,/26 (255.255.255.192),,,,.132,.133,.130,.131
+89,Printers,199.201.34.32,/28 (255.255.255.240),,,,.36,.37,.34,.35
+1,Management,129.44.57.16,/28 (255.255.255.240),.26,.27,.28,.20,.21,.17,.18
+,PTP,221.33.78.12,/30 (255.255.255.252),,,,,,.13,.14
+,ISP,201.98.56.16,/30 (255.255.255.252),,,,,,.17,
+,ISP,222.14.52.24,/30 (255.255.255.252),,,,,,,.25
+,,,,,,,,,,
+,,,,AS01,AS02,AS03,DS01,DS02,R01,R02
+,,,VTP Mode,Client,Client,Client,Client,Server,,
+,,,EIGRP ASN,,,,,,13,13
+,,,Spanning Tree Root Primary,,,,"101, 6,  12","1, 33, 3, 89",,
+,,,Spanning Tree Root Secondary,,,,"1, 33, 3, 89","101, 6,  12",,
+Console Password,spock,,,,,,,,,
+VTP Domain,cyberforce.us.mil,,,,Access Control List(s),,,,,
+VTP Password,Dominate!,,,,LIST #,(APPLY TO ALL VTY LINES),,,,
+Enable Secret,jtkirk,,,,37,Permit the ISP Management host.,,,,
+IP Domain,us.af.mil,,,,37,Permit the Management subnet.,,,,
+ISP Management,221.32.44.99,,,,LIST #,(APPLY TO ALL ISP FACING INTERFACES),,,,
+Username,cyber.war,Secret,CyberOn!,,144,Permit SSH from the ISP Management host.,,,,
+,,,,,144,Deny SSH from all other sources.,,,,
+,,,,,144,Permit all traffic from all other sources,,,,
+,,,,,,,,,,
+,,,,,Dynamic Routing,,,,,
+,,,,,EIGRP,"PTP, ISP, and ALL sub-interfaces on the router(s) should have EIGRP statements.",,,,
+,,,,,,,,,,

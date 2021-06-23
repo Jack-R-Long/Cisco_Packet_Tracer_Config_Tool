@@ -1,53 +1,90 @@
+import csv
+import sys
 
 
-class Core_Router:
-    def __init__ (self, hostname):
+class Device:
+    def __init__ (self, hostname, columnIndex):
         self.hostname = hostname
-        self.configs = {}
-        self.globalConfigs = {}
-        self.vlans = {}
-
+        self.column = columnIndex
+        self.router = False
+        self.dist_switch = False
+        self.access_switch = False
+        self.vlans = []
+    
+    def assignVlans(self, vlanList):
+        '''
+        Assign vlan data to object
+        '''
+        for vlan in vlanList:
+            vlanDict = {}
+            vlanDict['id'] = vlan[0]
+            vlanDict['name'] = vlan[1]
+            vlanDict['subnet'] = vlan[2]
+            vlanDict['ip'] = vlan[self.column]
+            self.vlans.append(vlanDict)
+    
     pass
 
-class Dist_Switch:
-    def __init__ (self, hostname):
-        self.hostname = hostname
-        self.configs = {}
-        self.globalConfigs = {}
-        self.vlans = {}
-    pass
-
-class Access_Switch:
-    def __init__ (self, hostname):
-        self.hostname = hostname
-        self.configs = {}
-        self.globalConfigs = {}
-    pass
 
 def main():
     '''
     Main function
     '''
+    # Verify user supplied csv
+    if (len(sys.argv) != 2):
+        print("Invalid input\nUsage `python main.py network_data.csv`")
+        return
+
+    # Read csv data
+    devices, vlans = readCSV(sys.argv[1])
+
+    # Create devices
+    deviceList = createDevices(devices)
+    
+    # Assign vlan ips
+    for device in deviceList:
+        device.assignVlans(vlans)
+    print(deviceList[1].vlans)
 
     # Get initial network design
-    numRouters = userInputInt("Number of core routers (2911s):")
-    routerList = createDevice(Core_Router, numRouters)
-    numSwitchesDist = userInputInt("Number of distribution switches (3560s): ")
-    switchDistList = createDevice(Dist_Switch, numSwitchesDist)
-    numSwitchesAccess = userInputInt("Number of access switches (2960s): ")
-    switchAcessList = createDevice(Access_Switch, numSwitchesAccess)
+    # numRouters = userInputInt("Number of core routers (2911s):")
+    # routerList = createDevice(Core_Router, numRouters)
+    # numSwitchesDist = userInputInt("Number of distribution switches (3560s): ")
+    # switchDistList = createDevice(Dist_Switch, numSwitchesDist)
+    # numSwitchesAccess = userInputInt("Number of access switches (2960s): ")
+    # switchAcessList = createDevice(Access_Switch, numSwitchesAccess)
 
-    # Get global configs
-    globalConfigs = getGlobalConfigs()
+    # # Get global configs
+    # globalConfigs = getGlobalConfigs()
 
-    # Get VLAN data
-    vlanDict = getVLANs()
+    # # Get VLAN data
+    # vlanDict = getVLANs()
     
-    # Config script for 
-    switchDistList = configDistSwitch(switchDistList, globalConfigs, vlanDict)
+    # # Config script for 
+    # switchDistList = configDistSwitch(switchDistList, globalConfigs, vlanDict)
 
-    # Output config script
-    outputTxt(switchDistList)
+    # # Output config script
+    # outputTxt(switchDistList)
+
+def readCSV(filename):
+    '''
+    Parse data from csv
+    '''
+    with open(filename, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        line_count = 0
+        vlans = []
+        for row in reader:
+            # First row
+            if line_count == 0:
+                devices = row[4:]
+            # VLANs
+            elif line_count < 14 and row[1] != '':
+                vlans.append(row)
+
+            line_count += 1
+        
+        return devices, vlans
 
 
 def userInputInt(prompt, min = 1, max = 10):
@@ -69,16 +106,25 @@ def userInputInt(prompt, min = 1, max = 10):
     return num
 
 
-def createDevice(type, number):
+def createDevices(deviceList):
     '''
     create network device object
     '''
-    deviceList = []
-    for x in range(number):
-        hostName = input(f"Name for device {x}: ")
-        deviceList.append(type(hostName))
-    
-    return deviceList
+    listOut = []
+    columnIndex = 4
+    for device in deviceList:
+        # Instantiate device object
+        deviceObject = Device(hostname=device, columnIndex = columnIndex)
+        deviceType = userInputInt(f"What type of device is {device}?\n1. Core router\n2. Dist switch\n3. Access switch\n Enter 1, 2, or 3: ", min=1, max=3)
+        if deviceType == 1:
+            deviceObject.router = True
+        elif deviceType == 2:
+            deviceObject.dist_switch = True
+        else:
+            deviceObject.access_switch = True
+        listOut.append(deviceObject)
+        columnIndex += 1
+    return listOut
 
 
 def getGlobalConfigs():
