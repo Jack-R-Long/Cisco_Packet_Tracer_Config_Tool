@@ -1,0 +1,8 @@
+-if you remove a device, make sure to remove it from the interface
+	-interface FastEthernet0/24
+	-no switchpoint voice vlan 111
+
+-make sure all IP addresses are correct
+-make sure no quotation marks in description, only in names
+
+-if you can't enter a switch, ssh to it and edit it from there

@@ -1,0 +1,150 @@
+------EXERCISE 2------
+enable
+configure t
+hostname R02
+
+enable secret jtkirk
+
+banner motd "You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.  You have read & consent to terms in the IS user agreement."
+
+ip domain-name us.af.mil
+no ip domain-lookup
+
+service timestamps log datetime msec
+service timestamps debug datetime msec
+
+line console 0
+password spock
+login
+exec-timeout 5
+logging synchronous
+
+interface GigabitEthernet0/0.1
+description Management
+encapsulation dot1q 1
+ip address 129.44.57.18 255.255.255.240
+
+------EXERCISE 3------
+configure t
+username cyber.war secret CyberOn!
+
+line vty 0 15
+login local
+exec-timeout 5
+logging synchronous
+transport input ssh
+exit
+
+crypto key generate rsa
+
+------EXERCISE 10------
+configure t
+interface GigabitEthernet0/0
+no shutdown
+
+interface GigabitEthernet0/1.101
+description Space Force1
+encapsulation dot1q 101
+ip address 112.11.22.131 255.255.255.128
+
+interface GigabitEthernet0/1.33
+description Cyber-Warrior
+encapsulation dot1q 33
+ip address 122.32.45.3 255.255.255.0
+
+interface GigabitEthernet0/1.6
+description 1961 CG
+encapsulation dot1q 6
+ip address 147.102.45.3 255.255.255.0
+
+interface GigabitEthernet0/1.3
+description 2130 CS
+encapsulation dot1q 3
+ip address 196.94.123.67 255.255.255.192
+
+interface GigabitEthernet0/1.12
+description 606 ACS
+encapsulation dot1q 12
+ip address 202.211.45.131 255.255.255.192
+
+interface GigabitEthernet0/1.89
+description Printers
+encapsulation dot1q 89
+ip address 199.201.34.35 255.255.255.240
+
+interface GigabitEthernet0/1.1
+description Management
+encapsulation dot1q 1
+ip address 129.44.57.18 255.255.255.240
+
+------EXERCISE 11------
+configure t
+interface g0/2
+ip address 222.14.52.25 255.255.255.252
+description ISP
+no shutdown
+exit
+
+interface g0/1
+ip address 221.33.78.14 255.255.255.252
+description PTP
+no shutdown
+
+------EXERCISE 12------
+configure t
+
+router eigrp 13
+network 112.11.22.128 0.0.0.127
+no auto-summary
+
+router eigrp 13
+network 122.32.45.0 0.0.0.255
+no auto-summary
+
+router eigrp 13
+network 147.102.45.0 0.0.0.255
+no auto-summary
+
+router eigrp 13
+network 196.94.123.64 0.0.0.63
+no auto-summary
+
+router eigrp 13
+network 202.211.45.128 0.0.0.63
+no auto-summary
+
+router eigrp 13
+network 199.201.34.32 0.0.0.15
+no auto-summary
+
+router eigrp 13
+network 129.44.57.16 0.0.0.15
+no auto-summary
+
+router eigrp 13
+network 221.33.78.12 0.0.0.3
+no auto-summary
+
+router eigrp 13
+network 222.14.52.24 0.0.0.3
+no auto-summary
+
+------EXERCISE 13------
+configure t
+ip access-list standard 37
+permit 221.32.44.99 0.0.0.0
+permit 129.44.57.16 0.0.0.255
+exit
+
+line vty 0 15
+access-class 37 in
+
+ip access-list extended 144
+permit tcp 221.32.44.99 0.0.0.0 any eq 22
+deny tcp any any eq 22
+permit ip any any
+exit
+
+interface GigabitEthernet0/2
+ip access-group 144 in
+

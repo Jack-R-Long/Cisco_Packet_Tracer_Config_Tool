@@ -1,0 +1,183 @@
+------EXERCISE 2------
+enable
+configure t
+hostname DS02
+
+enable secret jtkirk
+
+banner motd "You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.  You have read & consent to terms in the IS user agreement."
+
+ip domain-name us.af.mil
+no ip domain-lookup
+
+service timestamps log datetime msec
+service timestamps debug datetime msec
+
+line console 0
+password spock
+login
+exec-timeout 5
+logging synchronous
+
+interface vlan1
+ip address 129.44.57.21 255.255.255.240
+description Management
+no shutdown
+
+------EXERCISE 3------
+configure t
+username cyber.war secret CyberOn!
+
+line vty 0 15
+login local
+exec-timeout 5
+logging synchronous
+transport input ssh
+exit
+
+crypto key generate rsa
+
+------EXERCISE 4------
+configure t
+interface GigabitEthernet0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description R02
+
+interface FastEthernet0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description AS01
+
+interface FastEthernet0/9
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description AS02
+
+interface FastEthernet0/7
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description AS03
+
+interface FastEthernet0/3
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description DS01
+
+interface range FastEthernet0/1
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface range FastEthernet0/4-6
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface range FastEthernet0/8
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface range FastEthernet0/10-24
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface GigabitEthernet0/2
+switchport mode access
+switchport access vlan 111
+shutdown
+
+------EXERCISE 5------
+configure t
+vtp domain cyberforce.us.mil
+vtp password Dominate!
+
+vtp mode server
+vtp version 2
+
+------EXERCISE 6------
+configure t
+vlan 111
+name Shutdown
+exit
+
+vlan 101
+name "Space Force1"
+exit
+
+vlan 33
+name Cyber-Warrior
+exit
+
+vlan 6
+name "1961 CG"
+exit
+
+vlan 3
+name "2130 CS"
+exit
+
+vlan 12
+name "606 ACS"
+exit
+
+vlan 89
+name Printers
+exit
+
+vlan 1
+name Management
+exit
+
+------EXERCISE 7------
+configure t
+spanning-tree vlan 1 priority 12288
+spanning-tree vlan 33 priority 12288
+spanning-tree vlan 3 priority 12288
+spanning-tree vlan 89 priority 12288
+
+spanning-tree vlan 101 priority 16384
+spanning-tree vlan 6 priority 16384
+spanning-tree vlan 12 priority 16384
+
+------EXERCISE 9------
+configure t
+int vlan 101
+description Space Force1
+ip address 112.11.22.133 255.255.255.128
+
+int vlan 33
+description Cyber-Warrior
+ip address 122.32.45.5 255.255.255.0
+
+int vlan 6
+description 1961 CG
+ip address 147.102.45.5 255.255.255.0
+
+int vlan 3
+description 2130 CS
+ip address 196.94.123.69 255.255.255.192
+
+int vlan 12
+description 606 ACS
+ip address 202.211.45.133 255.255.255.192
+
+int vlan 89
+description Printers
+ip address 199.201.34.37 255.255.255.240
+
+int vlan 1
+description Management
+ip address 129.44.57.21 255.255.255.240
+
+------EXERCISE 13------
+configure t
+ip access-list standard 37
+permit 221.32.44.99 0.0.0.0
+permit 129.44.57.16 0.0.0.255
+exit
+
+line vty 0 15
+access-class 37 in

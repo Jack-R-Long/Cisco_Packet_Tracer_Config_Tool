@@ -1,0 +1,102 @@
+------EXERCISE 2------
+enable
+configure t
+hostname AS01
+
+enable secret jtkirk
+
+banner motd "You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.  You have read & consent to terms in the IS user agreement."
+
+ip domain-name us.af.mil
+no ip domain-lookup
+
+service timestamps log datetime msec
+service timestamps debug datetime msec
+
+line console 0
+password spock
+login
+exec-timeout 5
+logging synchronous
+
+interface vlan1
+ip address 129.44.57.26 255.255.255.240
+description Management
+no shutdown
+
+------EXERCISE 3------
+configure t
+username cyber.war secret CyberOn!
+
+line vty 0 15
+login local
+exec-timeout 5
+logging synchronous
+transport input ssh
+exit
+
+crypto key generate rsa
+
+------EXERCISE 4------
+configure t
+interface GigabitEthernet0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description DS01
+
+interface GigabitEthernet0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+description DS02
+
+interface range FastEthernet0/1-17
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface range FastEthernet0/19-20
+switchport mode access
+switchport access vlan 111
+shutdown
+
+interface range FastEthernet0/22-24
+switchport mode access
+switchport access vlan 111
+shutdown
+
+------EXERCISE 5------
+configure t
+vtp domain cyberforce.us.mil
+vtp password Dominate!
+
+vtp mode client
+
+------EXERCISE 6------
+configure t
+interface FastEthernet0/21
+switchport access vlan 89
+switchport mode access
+
+interface FastEthernet0/18
+switchport access vlan 3
+switchport mode access
+
+------EXERCISE 8------
+configure t
+interface range FastEthernet0/1-24
+switchport mode access
+switchport port-security
+
+switchport port-security violation shutdown
+switchport port-security maximum 2
+switchport port-security mac-address sticky
+
+------EXERCISE 13------
+configure t
+ip access-list standard 37
+permit 221.32.44.99 0.0.0.0
+permit 129.44.57.16 0.0.0.255
+exit
+
+line vty 0 15
+access-class 37 in
