@@ -1,22 +1,37 @@
+hostName = ""
+secretPass = ""
+bannerMOTD = ""
+ipDomain = ""
+consolePass = ""
+mgmtVLAN = 1
+mgmtVLANMask= ""
+vlanDesc = ""
+sshUserName= ""
+sshSecret = ""
+sshKeyBitModulus = 1024
+vtpDomain = ""
+vtpPassword = ""
+
+
 distSwitchScript = [
     "enable",
     "configure t",
-    "hostname TEMP",
-    "enable secret TEMP",
-    "banner motd TEMP",
-    "ip domain-name TEMP",
+    "hostname " + hostName,
+    "enable secret " + secretPass,
+    "banner motd " + bannerMOTD,
+    "ip domain-name " + ipDomain,
     "no ip domain-lookup",
     "service timestamps log datetime msec",
     "service timestamps debug datetime msec",
 
     "line console 0",
-    "password spock",
+    "password " + consolePass,
     "login",
     "exec-timeout 5",
     "logging synchronous",
 
     "interface vlan1",
-    "ip address DEVICE_IP MASK",
+    "ip address " + mgmtVLAN + " " + mgmtVLANMask,
     "description VLANDESC",
     "no shutdown",
 
