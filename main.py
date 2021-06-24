@@ -172,10 +172,10 @@ def writeInitialConfigs(deviceList):
     '''
     # Get user input for managment VLAN ID
     mgmtVlanID = str(userInputInt("VLAN ID for the Management VLAN: ", 1, 1000))
+    routerPort = str(userInputInt("Port connects the routers to the switches: G0/", 1, 4))
     for device in deviceList:
-        lastMGMTOctet = device.vlans[mgmtVlanID]['id']
-        mgmtIP = device.vlans[mgmtVlanID]['subnet'][:-(len(lastMGMTOctet)-1)] + lastMGMTOctet[2:]
-        print(mgmtIP)
+        lastMGMTOctet = device.vlans[mgmtVlanID]['ip']
+        mgmtIP = device.vlans[mgmtVlanID]['subnet'][:-(len(lastMGMTOctet))] + lastMGMTOctet
         initialConfigScript = [
         "! 1 CONFIGS **************",
         "enable",
@@ -195,19 +195,22 @@ def writeInitialConfigs(deviceList):
         ]
         if device.router == True:
             initialConfigScript += [
-                'interface GigabitEthernet0/0.' + mgmtVlanID,
-                'description Management',
-                'encapsulation dot1q ' + mgmtVlanID,
-                'ip address ' + mgmtIP + ' ' + device.vlans[mgmtVlanID]['mask'],
+                "interface GigabitEthernet0/" + routerPort + "." + mgmtVlanID,
+                "description " + device.vlans[mgmtVlanID]['name'],
+                "encapsulation dot1q " + mgmtVlanID,
+                "ip address " + mgmtIP + ' ' + device.vlans[mgmtVlanID]['mask'],
             ]
         else :
             initialConfigScript += [
             "interface vlan" + device.vlans[mgmtVlanID]['id'],
             "ip address " + mgmtIP + " " + device.vlans[mgmtVlanID]['mask'],
-            "description Management",
+            "description " + device.vlans[mgmtVlanID]['name'],
             "no shutdown",
             ]
         initialConfigScript += [
+        "exit",
+        "exit",
+        "w",
         "! 2 SSH CONFIGS **************",
         "configure t",
         "username " + device.globalConfigs['Username'] + " secret " + device.globalConfigs['Secret'],
@@ -220,6 +223,8 @@ def writeInitialConfigs(deviceList):
         "crypto key generate rsa",
         "y",
         device.globalConfigs['Bit Modulus'],
+        "exit",
+        "w",
         ]
         device.configScript = initialConfigScript
     return deviceList
