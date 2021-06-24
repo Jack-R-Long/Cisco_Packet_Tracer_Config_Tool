@@ -9,9 +9,10 @@ class Device:
         self.router = False
         self.dist_switch = False
         self.access_switch = False
-        self.vlans = []
+        self.vlans = {}
         self.globalConfigs = {}
         self.ports = {}
+        self.configScript = []
     
     def assignVlans(self, vlanList):
         '''
@@ -22,8 +23,9 @@ class Device:
             vlanDict['id'] = vlan[0]
             vlanDict['name'] = vlan[1]
             vlanDict['subnet'] = vlan[2]
+            vlanDict['mask'] = vlan[3][5:-1]
             vlanDict['ip'] = vlan[self.column]
-            self.vlans.append(vlanDict)
+            self.vlans[vlan[0]] = vlanDict
     
     def assignPorts(self, portconfigs):
         '''
@@ -33,7 +35,14 @@ class Device:
             if portDict['hostname'] == self.hostname:
                 self.ports = portDict
     
-    pass
+    def printTxt(self):
+        '''
+        Print out the config script
+        '''
+        f = open(self.hostname + ".txt", "w")
+        # Write to file, each list index a new line
+        f.writelines("%s\n" % line for line in self.configScript)
+        f.close()
 
 
 def main():
@@ -58,8 +67,10 @@ def main():
         device.assignPorts(portConfigs)
         device.globalConfigs = globalConfigs
 
-    print(deviceList[1].ports)
     # Create script
+    writeInitialConfigs(deviceList)
+    for device in deviceList:
+        device.printTxt()
 
 
 def readNetworkCSV(networkData):
@@ -153,6 +164,65 @@ def createDevices(deviceList):
         listOut.append(deviceObject)
         columnIndex += 1
     return listOut
+
+
+def writeInitialConfigs(deviceList):
+    '''
+    Write initial config script for each device
+    '''
+    # Get user input for managment VLAN ID
+    mgmtVlanID = str(userInputInt("VLAN ID for the Management VLAN: ", 1, 1000))
+    for device in deviceList:
+        lastMGMTOctet = device.vlans[mgmtVlanID]['id']
+        mgmtIP = device.vlans[mgmtVlanID]['subnet'][:-(len(lastMGMTOctet)-1)] + lastMGMTOctet[2:]
+        print(mgmtIP)
+        initialConfigScript = [
+        "! 1 CONFIGS **************",
+        "enable",
+        "configure t",
+        "hostname " + device.hostname,
+        "enable secret " + device.globalConfigs['Enable Secret'],
+        "banner motd " + device.globalConfigs['Banner'],
+        "ip domain-name " + device.globalConfigs['IP Domain'],
+        "no ip domain-lookup",
+        "service timestamps log datetime msec",
+        "service timestamps debug datetime msec",
+        "line console 0",
+        "password " + device.globalConfigs['Console Password'],
+        "login",
+        "exec-timeout 5",
+        "logging synchronous",
+        ]
+        if device.router == True:
+            initialConfigScript += [
+                'interface GigabitEthernet0/0.' + mgmtVlanID,
+                'description Management',
+                'encapsulation dot1q ' + mgmtVlanID,
+                'ip address ' + mgmtIP + ' ' + device.vlans[mgmtVlanID]['mask'],
+            ]
+        else :
+            initialConfigScript += [
+            "interface vlan" + device.vlans[mgmtVlanID]['id'],
+            "ip address " + mgmtIP + " " + device.vlans[mgmtVlanID]['mask'],
+            "description Management",
+            "no shutdown",
+            ]
+        initialConfigScript += [
+        "! 2 SSH CONFIGS **************",
+        "configure t",
+        "username " + device.globalConfigs['Username'] + " secret " + device.globalConfigs['Secret'],
+        "line vty 0 15",
+        "login local",
+        "exec-timeout 5",
+        "logging synchronous",
+        "transport input ssh",
+        "exit",
+        "crypto key generate rsa",
+        "y",
+        device.globalConfigs['Bit Modulus'],
+        ]
+        device.configScript = initialConfigScript
+    return deviceList
 
 
 def outputTxt(distSwitchList):

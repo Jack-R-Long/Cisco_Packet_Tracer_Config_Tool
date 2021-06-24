@@ -1,32 +1,32 @@
-VLAN ID,VLAN Name,Subnet,CIDR (Subnet Mask),AS01,AS02,AS03,DS01,DS02,R01,R02
-111,Shutdown,,,,,,,,,
-101,Space Force1,112.11.22.128,/25 (255.255.255.128),,,,0.132,0.133,0.13,0.131
-33,Cyber-Warrior,122.32.45.0,/24 (255.255.255.0),,,,0.4,0.5,0.2,0.3
-6,1961 CG,147.102.45.0,/24 (255.255.255.0),,,,0.4,0.5,0.2,0.3
-3,2130 CS,196.94.123.64,/26 (255.255.255.192),,,,0.68,0.69,0.66,0.67
-12,606 ACS,202.211.45.128,/26 (255.255.255.192),,,,0.132,0.133,0.13,0.131
-89,Printers,199.201.34.32,/28 (255.255.255.240),,,,0.36,0.37,0.34,0.35
-1,Management,129.44.57.16,/28 (255.255.255.240),0.26,0.27,0.28,0.2,0.21,0.17,0.18
-,PTP,221.33.78.12,/30 (255.255.255.252),,,,,,0.13,0.14
-,ISP,201.98.56.16,/30 (255.255.255.252),,,,,,0.17,
-,ISP,222.14.52.24,/30 (255.255.255.252),,,,,,,0.25
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,AS01,AS02,AS03,DS01,DS02,R01,R02
-,,,VTP Mode,Client,Client,Client,Client,Server,,
-,,,EIGRP ASN,,,,,,13,13
-,,,Spanning Tree Root Primary,,,,"101, 6,  12","1, 33, 3, 89",,
-Banner,"""this is a USG""",,Spanning Tree Root Secondary,,,,"1, 33, 3, 89","101, 6,  12",,
-Console Password,spock,,,,,,,,,
-VTP Domain,cyberforce.us.mil,,,,Access Control List(s),,,,,
-VTP Password,Dominate!,,,,LIST #,(APPLY TO ALL VTY LINES),,,,
-Enable Secret,jtkirk,,,,37,Permit the ISP Management host.,,,,
-IP Domain,us.af.mil,,,,37,Permit the Management subnet.,,,,
-ISP Management,221.32.44.99,,,,LIST #,(APPLY TO ALL ISP FACING INTERFACES),,,,
-Username,cyber.war,,,,144,Permit SSH from the ISP Management host.,,,,
-Secret,CyberOn!,,,,144,Deny SSH from all other sources.,,,,
-Bit Modulus,1024,,,,144,Permit all traffic from all other sources,,,,
-,,,,,,,,,,
-,,,,,Dynamic Routing,,,,,
-,,,,,EIGRP,"PTP, ISP, and ALL sub-interfaces on the router(s) should have EIGRP statements.",,,,
+VLAN ID,VLAN Name,Subnet,CIDR (Subnet Mask),f1-2960,f2-2960,f1-3560,f2-3560,f1-2911,f2-2911
+909,Shutdown,-,-,-,-,-,-,-,-
+17,17DxA,129.13.17.0,/26 (255.255.255.192),-,-,.1,.2,.3,.4
+27,17DxB,129.13.17.64,/27 (255.255.255.224),-,-,.65,.66,.67,.68
+37,17SxA,129.13.17.96,/28 (255.255.255.240),-,-,.97,.98,.99,.100
+47,17SxB,129.13.17.112,/28 (255.255.255.240),-,-,.113,.114,.115,.116
+1,MGMT,192.168.1.0,/24 (255.255.255.0),.1,.2,.3,.4,.5,.6
+-,PTP,129.13.17.128,/30 (255.255.255.252),-,-,-,-,.129,.130
+,Remote,129.13.17.132,/30 (255.255.255.252),-,-,-,-,.133,-
+-,Telco-ISP,129.13.17.136,/30 (255.255.255.252),-,-,-,-,.137,-
+-,Telco-ISP,129.13.17.140,/30 (255.255.255.252),-,-,-,-,-,.141
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,f1-2960,f2-2960,f1-3560,f2-3560,f1-2911,f2-2911
+,,,VTP Mode,Client,Client,Server,Client,-,-
+,,,EIGRP ASN,-,-,-,-,17,17
+,,,Spanning Tree Root Primary,-,-,"1, 17, 27","37, 47",-,-
+Banner,"""You are now becoming a cyber warrior. A great mission and adventure lies before you.""",,Spanning Tree Root Secondary,-,-,"37, 47","1, 17, 27",-,-
+Console Password,cyber,,,,,,,,
+VTP Domain,vlan.keesler.af.mil,,,,Access Control List(s),,,,
+VTP Password,mad,,,,LIST #,(APPLY TO ALL VTY LINES),,,
+Enable Secret,warrior,,,,37,Permit the ISP Management host.,,,
+IP Domain,keesler.af.mil,,,,37,Permit the Management subnet.,,,
+ISP Management,220.220.240.8,,,,LIST #,(APPLY TO ALL ISP FACING INTERFACES),,,
+Username,student.adm,,,,144,Permit SSH from the ISP Management host.,,,
+Secret,ducks,,,,144,Deny SSH from all other sources.,,,
+Bit Modulus,1024,,,,144,Permit all traffic from all other sources,,,
+,,,,,,,,,
+,,,,,Dynamic Routing,,,,
+,,,,,EIGRP,"PTP, ISP, and ALL sub-interfaces on the router(s) should have EIGRP statements.",,,
