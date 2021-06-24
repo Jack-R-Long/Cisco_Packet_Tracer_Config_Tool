@@ -61,25 +61,6 @@ def main():
     print(deviceList[1].ports)
     # Create script
 
-    # Get initial network design
-    # numRouters = userInputInt("Number of core routers (2911s):")
-    # routerList = createDevice(Core_Router, numRouters)
-    # numSwitchesDist = userInputInt("Number of distribution switches (3560s): ")
-    # switchDistList = createDevice(Dist_Switch, numSwitchesDist)
-    # numSwitchesAccess = userInputInt("Number of access switches (2960s): ")
-    # switchAcessList = createDevice(Access_Switch, numSwitchesAccess)
-
-    # # Get global configs
-    # globalConfigs = getGlobalConfigs()
-
-    # # Get VLAN data
-    # vlanDict = getVLANs()
-    
-    # # Config script for 
-    # switchDistList = configDistSwitch(switchDistList, globalConfigs, vlanDict)
-
-    # # Output config script
-    # outputTxt(switchDistList)
 
 def readNetworkCSV(networkData):
     '''
@@ -101,7 +82,6 @@ def readNetworkCSV(networkData):
             elif row[0] != '':
                 globalConfigs[row[0]] = row[1]
             line_count += 1
-        
         return devices, vlans, globalConfigs
 
 
@@ -174,48 +154,6 @@ def createDevices(deviceList):
         columnIndex += 1
     return listOut
 
-
-def configDistSwitch(distSwitchList, globalConfigs, vlanDict):
-    '''
-    get user input for dist switches
-    '''
-    switchConfigsDict = {
-        'managment-IP' : "",
-        'trunks' : [],
-        'closed-fa-ports' : [],
-        'closed-ga-ports' : [],
-        'vtp-mode' : 'client'
-        
-    }
-    for switch in distSwitchList:
-        # Apply global configs
-        switch.globalConfigs = globalConfigs
-
-        # Get config values for dist switches
-        print(f"\n Config values for Dist Switch {switch.hostname} \n")
-        for key in switchConfigsDict:
-            if key == 'closed-fa-ports' or key == 'closed-ga-ports':
-                numClosedPorts = userInputInt(f"Number of {key}: ", 1, 24)
-                for x in range(numClosedPorts):
-                    closedPort = userInputInt(f"Closed {key[7:9]} port: ", 1, 24)
-                    switchConfigsDict[key].append(closedPort)
-            elif key == 'trunks':
-                numTrunks = userInputInt(f"Number of trunk connections: ")
-                for x in range(1, 1 + numTrunks):
-                    trunkDict = {}
-                    trunkDict['trunk-interface'] = input('trunk' + str(x) + '-interface: ')
-                    trunkDict['trunk-description'] = input('trunk' + str(x) + '-description: ')
-                    # append trunk dict to list of trunks
-                    switchConfigsDict[key].append(trunkDict)
-            else:
-                switchConfigsDict[key] = input(f"{key}: ")
-        switch.configs = switchConfigsDict
-        
-        # Get VLAN IP
-        for key in vlanDict:
-            switch.vlans[key] = input(f"Device {switch.hostname} IP address in {key} VLAN (subnet = {vlanDict[key]}): ")
-    
-    return distSwitchList
 
 def outputTxt(distSwitchList):
     '''
