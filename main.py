@@ -11,6 +11,7 @@ class Device:
         self.access_switch = False
         self.vlans = []
         self.globalConfigs = {}
+        self.ports = {}
     
     def assignVlans(self, vlanList):
         '''
@@ -23,6 +24,15 @@ class Device:
             vlanDict['subnet'] = vlan[2]
             vlanDict['ip'] = vlan[self.column]
             self.vlans.append(vlanDict)
+    
+    def assignPorts(self, portconfigs):
+        '''
+        Assign port configs 
+        '''
+        for portDict in portconfigs:
+            if portDict['hostname'] == self.hostname:
+                self.ports = portDict
+    
     pass
 
 
@@ -37,16 +47,18 @@ def main():
 
     # Read csv data
     devices, vlans, globalConfigs= readNetworkCSV(sys.argv[1])
-    devicePortConfigs = readDeviceCSV(sys.argv[2])
+    portConfigs = readDeviceCSV(sys.argv[2])
 
     # Create devices
     deviceList = createDevices(devices)
     
-    # Assign vlan ips and global config
+    # Assign config data to each device
     for device in deviceList:
         device.assignVlans(vlans)
+        device.assignPorts(portConfigs)
         device.globalConfigs = globalConfigs
 
+    print(deviceList[1].ports)
     # Create script
 
     # Get initial network design
