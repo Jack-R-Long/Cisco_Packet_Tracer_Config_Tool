@@ -23,7 +23,6 @@ class Device:
             vlanDict['subnet'] = vlan[2]
             vlanDict['ip'] = vlan[self.column]
             self.vlans.append(vlanDict)
-    
     pass
 
 
@@ -32,12 +31,13 @@ def main():
     Main function
     '''
     # Verify user supplied csv
-    if (len(sys.argv) != 2):
-        print("Invalid input\nUsage `python main.py network_data.csv`")
+    if (len(sys.argv) != 3):
+        print("Invalid input\nUsage `python main.py network_data.csv device_data.csv`")
         return
 
     # Read csv data
-    devices, vlans, globalConfigs= readCSV(sys.argv[1])
+    devices, vlans, globalConfigs= readNetworkCSV(sys.argv[1])
+    devicePortConfigs = readDeviceCSV(sys.argv[2])
 
     # Create devices
     deviceList = createDevices(devices)
@@ -69,11 +69,11 @@ def main():
     # # Output config script
     # outputTxt(switchDistList)
 
-def readCSV(filename):
+def readNetworkCSV(networkData):
     '''
-    Parse data from csv
+    Parse data from network csv
     '''
-    with open(filename, newline='') as csvfile:
+    with open(networkData, newline='') as csvfile:
         reader = csv.reader(csvfile)
         line_count = 0
         vlans = []
@@ -88,10 +88,39 @@ def readCSV(filename):
             # Global data 
             elif row[0] != '':
                 globalConfigs[row[0]] = row[1]
-
             line_count += 1
         
         return devices, vlans, globalConfigs
+
+
+def readDeviceCSV(deviceFile):
+    '''
+    Parse data from device csv
+    '''
+    with open(deviceFile, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        devices = []
+        outputData = []
+        line_count = 0
+        for row in reader:
+            # Devices
+            if line_count == 0:
+                devices = row[1:]
+                # devices = [i for i in devices if i]
+                for x in range(len(devices)):
+                    if devices[x]:
+                        outputData.append({
+                            'hostname' : devices[x],
+                            'index' : x + 1
+                        })
+            # Port data
+            elif line_count > 1:
+                for dictX in outputData:
+                    # Interface description and trunk
+                    dictX[row[0]] = [row[dictX['index']], row[dictX['index'] + 1]]
+            # Increment
+            line_count += 1
+        return outputData
 
 
 def userInputInt(prompt, min = 1, max = 10):
