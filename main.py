@@ -69,8 +69,11 @@ def main():
 
     # Create script
     writeInitialConfigs(deviceList)
+    writePortConfigs(deviceList)
     for device in deviceList:
-        device.printTxt()
+        # print(device.ports)
+        # device.printTxt()
+        print('Done')
 
 
 def readNetworkCSV(networkData):
@@ -182,7 +185,7 @@ def writeInitialConfigs(deviceList):
         "configure t",
         "hostname " + device.hostname,
         "enable secret " + device.globalConfigs['Enable Secret'],
-        "banner motd " + device.globalConfigs['Banner'],
+        "banner motd " + device.globalConfigs['MOTD'],
         "ip domain-name " + device.globalConfigs['IP Domain'],
         "no ip domain-lookup",
         "service timestamps log datetime msec",
@@ -229,6 +232,39 @@ def writeInitialConfigs(deviceList):
         device.configScript = initialConfigScript
     return deviceList
 
+
+def writePortConfigs(deviceList):
+    '''
+    Create port config script for each device
+    '''
+    shutdownVLANID = str(userInputInt("VLAN ID for the Shutdown VLAN: ", 1, 1000))
+    # Trunk congfigs
+    for device in deviceList:
+        closedPortsScript = []
+        device.configScript += ['------EXERCISE 4------', 'config t']
+        for key in device.ports:
+            if (key != 'hostname' and key != 'index'):
+                # Trunks
+                if (device.ports[key][1]):
+                    device.configScript += [
+                        '',
+                        'interface ' + key,
+                        'switchport trunk encapsulation dot1q',
+                        'switchport mode trunk',
+                        'description ' + device.ports[key][0],
+                    ]
+                # Close unused ports
+                elif (device.ports[key][0] == ''):
+                        closedPortsScript += [
+                        '',
+                        'interface ' + key,
+                        'switchport mode access',
+                        'switchport access vlan ' + device.vlans[shutdownVLANID]['id'],
+                        'shutdown',
+                    ]
+            # Add usused port commands after trunks
+            device.configScript += closedPortsScript
+        print(device.configScript)
 
 def outputTxt(distSwitchList):
     '''

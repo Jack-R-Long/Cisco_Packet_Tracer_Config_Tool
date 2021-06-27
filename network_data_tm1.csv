@@ -1,0 +1,33 @@
+VLAN ID,VLAN Name,Subnet,CIDR (Subnet Mask),333TRS,MPF/Finance/EdCtr,81CS-distro,Sablich-distro,81CS-core,Sablich-core
+909,Shutdown,,,,,,,,
+21,EdCtr,213.107.100.0,/26 (255.255.255.192),,,0.1,0.2,0.3,0.4
+42,UMS/CC,213.107.100.64,/27 (255.255.255.224),,,0.65,0.66,0.67,0.68
+1,MGMT,213.107.100.96,/28 (255.255.255.240),0.97,0.98,0.99,0.1,0.101,0.102
+6,Finance,213.107.100.112,/28 (255.255.255.240),,,0.113,0.114,0.115,0.116
+14,ICF IS,213.107.100.128,/28 (255.255.255.240),,,0.129,0.130,0.131,0.132
+22,MPF,213.107.100.144,/29 (255.255.255.248),,,.145,.146,.147,.148
+-,Telco-ISP,213.107.100.152,/30 (255.255.255.252),,,,,.153,
+-,Telco-ISP,213.107.100.156,/30 (255.255.255.252),,,,,,.157
+-,85thEIS-router,213.107.100.160,/30 (255.255.255.252),,,,,.161,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,333TRS,MPF/Finance/EdCtr,81CS-distro,Sablich-distro,,
+,,,VTP Mode,Client,Client,Server,Client,,
+,,,EIGRP ASN,-,-,23,23,,
+,,,Spanning Tree Root Primary,-,-,,,-,-
+,,,Spanning Tree Root Secondary,-,-,,,-,-
+Console Password,cyber,,,,,,,,
+VTP Domain,vlan.keesler.af.mil,,,,Access Control List(s),,,,
+VTP Password,mad,,,,LIST #,(APPLY TO ALL VTY LINES),,,
+Enable Secret,warrior,,,,37,Permit the ISP Management host.,,,
+IP Domain,keesler.af.mil,,,,37,Permit the Management subnet.,,,
+ISP Management,129.44.31.62,,,,LIST #,(APPLY TO ALL ISP FACING INTERFACES),,,
+Username,student.adm,,,,144,Permit SSH from the ISP Management host.,,,
+Secret,ducks,,,,144,Deny SSH from all other sources.,,,
+Bit Modulus,1024,,,,144,Permit all traffic from all other sources,,,
+MOTD,"""You are now becoming a cyber warrior. A great mission and adventure lies before you.""",,,,,,,,
+,,,,,Dynamic Routing,,,,
+,,,,,EIGRP,"The ISP, 85th EIS, and all sub-interfaces on the router(s) should have EIGRP statements.",,,
+,,,,,,,,,
