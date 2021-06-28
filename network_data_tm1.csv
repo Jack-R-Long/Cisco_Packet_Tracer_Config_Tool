@@ -15,9 +15,9 @@ xxx,85thEIS-router,213.107.100.160,/30 (255.255.255.252),,,,,0.161,
 ,,,,,,,,,
 ,,,,333TRS,MPF/Finance/EdCtr,81CS-distro,Sablich-distro,,
 ,,,VTP Mode,Client,Client,Server,Client,,
-,,,EIGRP ASN,-,-,23,23,,
-,,,Spanning Tree Root Primary,-,-,,,-,-
-,,,Spanning Tree Root Secondary,-,-,,,-,-
+,,,EIGRP ASN,,,23,23,,
+,,,Spanning Tree Root Primary,,,"14, 42","1, 6, 21, 22",,
+,,,Spanning Tree Root Secondary,,,"1, 6, 21, 22","14, 42",,
 Console Password,cyber,,,,,,,,
 VTP Domain,vlan.keesler.af.mil,,,,Access Control List(s),,,,
 VTP Password,mad,,,,LIST #,(APPLY TO ALL VTY LINES),,,

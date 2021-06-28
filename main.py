@@ -13,6 +13,8 @@ class Device:
         self.globalConfigs = {}
         self.ports = {}
         self.vtp_mode = 'client'
+        self.stp_root = []
+        self.stp_secondary = []
         self.configScript = []
     
     def assignVlans(self, vlanList):
@@ -57,11 +59,11 @@ def main():
         return
 
     # Read csv data
-    devices, vlans, globalConfigs, vtpData= readNetworkCSV(sys.argv[1])
+    devices, vlans, globalConfigs, vtpData, stpData = readNetworkCSV(sys.argv[1])
     portConfigs = readDeviceCSV(sys.argv[2])
 
     # Create devices
-    deviceList = createDevices(devices, vtpData)
+    deviceList = createDevices(devices, vtpData, stpData)
     
     # Assign config data to each device
     for device in deviceList:
@@ -73,6 +75,9 @@ def main():
     writeInitialConfigs(deviceList)
     writePortConfigs(deviceList)
     writeVLANs(deviceList)
+    writeSTP(deviceList)
+    writePortSecurity(deviceList)
+    writeRoutingDistSwitches(deviceList)
     for device in deviceList:
         device.printTxt()
         # print('done')
@@ -88,6 +93,7 @@ def readNetworkCSV(networkData):
         vlans = []
         globalConfigs = {}
         vtpData = []
+        stpData = []
         for row in reader:
             # First row
             if line_count == 0:
@@ -101,9 +107,15 @@ def readNetworkCSV(networkData):
             # Routing data
             elif row[3] == 'VTP Mode':
                 vtpData = [i for i in row[4:] if i]
+            # STP data
+            elif row[3] == 'Spanning Tree Root Primary':
+                stpData = [i for i in row[4:] if i]
+                for x in range(len(stpData)):
+                    stpData[x] = stpData[x].replace(',', '').split()
+                    
             line_count += 1
                     
-        return devices, vlans, globalConfigs, vtpData
+        return devices, vlans, globalConfigs, vtpData, stpData
 
 
 def readDeviceCSV(deviceFile):
@@ -155,7 +167,7 @@ def userInputInt(prompt, min = 1, max = 10):
     return num
 
 
-def createDevices(deviceList, vtpData):
+def createDevices(deviceList, vtpData, stpData):
     '''
     create network device object
     '''
@@ -176,6 +188,14 @@ def createDevices(deviceList, vtpData):
     # Add VTP data (only switches (i.e. first 4))
     for x in range(len(vtpData)):
         listOut[x].vtp_mode = vtpData[x]
+    # Add STP to dist switches
+    indexNeeded = 1
+    for device in listOut:
+        if device.dist_switch == True:
+            device.stp_root = stpData[indexNeeded -1 ]
+            device.stp_secondary = stpData[indexNeeded]
+            indexNeeded = 0
+            
     return listOut
 
 
@@ -312,6 +332,63 @@ def writeVLANs(deviceList):
                         'int ' + key,
                         'switchport access vlan ' + device.ports[key][0],
                         'switchport mode access',
+                    ]
+
+
+def writeSTP(deviceList):
+    '''
+    Write Spanning Tree Protocol configs
+    '''
+    rootPriority = userInputInt('STP root priority value (ex. 4096): ', 1, 10000)
+    secPriority = userInputInt('STP secondary priority value (ex. 8192): ', 1, 10000)
+
+    for device in deviceList:
+         if device.dist_switch == True:
+            device.configScript += ['', '! 6 STP SETUP **********']
+            for vlanID in device.stp_root:
+                device.configScript += [
+                    'spanning-tree vlan ' + vlanID + ' priority ' + str(rootPriority)
+                ]
+            for vlanID in device.stp_secondary:
+                device.configScript += ['',
+                    'spanning-tree vlan ' + vlanID + ' priority ' + str(secPriority)
+                ]
+
+
+def writePortSecurity(deviceList):
+    '''
+    Write port security for access layer switches
+    '''
+    for device in deviceList:
+     if device.access_switch == True:
+        #  Hard code this because I am lazy
+        device.configScript += ['', '! 7 PORT SECURITY **********',
+            'interface range FastEthernet0/1-24',
+            'switchport mode access',
+            'switchport port-security',
+
+            'switchport port-security violation shutdown',
+            'switchport port-security maximum 2',
+            'switchport port-security mac-address sticky',
+        ]
+
+
+def writeRoutingDistSwitches(deviceList):
+    '''
+    Create a layer 3 presence for each dist switch using SVIs
+    '''
+    for device in deviceList:
+        if device.dist_switch == True:
+            device.configScript += ['', '! 8 SVI SWITCH ROUTING **********']
+            for key in device.vlans:
+                # Skip VLANs that don't have id and shutdown
+                if 'x' not in key and device.vlans[key]['name'] != 'Shutdown':
+                    lastOctet = device.vlans[key]['ip']
+                    device.vlans[key]['ip_address'] = device.vlans[key]['subnet'][1:-(len(lastOctet))] + lastOctet[1::]
+                    device.configScript += ['',
+                        'int vlan ' + key,
+                        'description ' + device.vlans[key]['name'],
+                        'ip address ' + device.vlans[key]['ip_address'] + ' ' + device.vlans[key]['subnet'],
                     ]
 
 
