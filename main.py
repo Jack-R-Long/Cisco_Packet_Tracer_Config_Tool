@@ -57,11 +57,11 @@ def main():
         return
 
     # Read csv data
-    devices, vlans, globalConfigs= readNetworkCSV(sys.argv[1])
+    devices, vlans, globalConfigs, vtpData= readNetworkCSV(sys.argv[1])
     portConfigs = readDeviceCSV(sys.argv[2])
 
     # Create devices
-    deviceList = createDevices(devices)
+    deviceList = createDevices(devices, vtpData)
     
     # Assign config data to each device
     for device in deviceList:
@@ -72,8 +72,10 @@ def main():
     # Create script
     writeInitialConfigs(deviceList)
     writePortConfigs(deviceList)
+    writeVLANs(deviceList)
     for device in deviceList:
         device.printTxt()
+        # print('done')
 
 
 def readNetworkCSV(networkData):
@@ -85,6 +87,7 @@ def readNetworkCSV(networkData):
         line_count = 0
         vlans = []
         globalConfigs = {}
+        vtpData = []
         for row in reader:
             # First row
             if line_count == 0:
@@ -95,8 +98,12 @@ def readNetworkCSV(networkData):
             # Global data 
             elif row[0] != '':
                 globalConfigs[row[0]] = row[1]
+            # Routing data
+            elif row[3] == 'VTP Mode':
+                vtpData = [i for i in row[4:] if i]
             line_count += 1
-        return devices, vlans, globalConfigs
+                    
+        return devices, vlans, globalConfigs, vtpData
 
 
 def readDeviceCSV(deviceFile):
@@ -148,7 +155,7 @@ def userInputInt(prompt, min = 1, max = 10):
     return num
 
 
-def createDevices(deviceList):
+def createDevices(deviceList, vtpData):
     '''
     create network device object
     '''
@@ -166,6 +173,9 @@ def createDevices(deviceList):
             deviceObject.access_switch = True
         listOut.append(deviceObject)
         columnIndex += 1
+    # Add VTP data (only switches (i.e. first 4))
+    for x in range(len(vtpData)):
+        listOut[x].vtp_mode = vtpData[x]
     return listOut
 
 
@@ -278,6 +288,32 @@ def writeVLANs(deviceList):
     '''
     Write VLAN configs on VTP server and configure accees switch vlans
     '''
+    for device in deviceList:
+        # Config VLAN table on VTP server
+        if device.vtp_mode == 'Server':
+            device.configScript += ['! 5 VLAN SETUP **********']
+            for key in device.vlans:
+                # Skip VLANs that don't have id
+                if 'x' not in key:
+                    device.configScript += [
+                        '',
+                        'vlan ' + key,
+                        'name ' + device.vlans[key]['name'],
+                        'exit',
+                    ]
+        # Config access ports on access swtiche
+        elif device.access_switch == True:
+            device.configScript += ['! 5 VLAN SETUP **********']
+            for key in device.ports:
+                # Get fa ports that have description
+                if 'fa' in key and device.ports[key][0]:
+                    device.configScript += [
+                        '',
+                        'int ' + key,
+                        'switchport access vlan ' + device.ports[key][0],
+                        'switchport mode access',
+                    ]
+
 
 if __name__ == '__main__':
     main()
