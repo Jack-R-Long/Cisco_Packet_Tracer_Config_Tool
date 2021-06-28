@@ -12,6 +12,7 @@ class Device:
         self.vlans = {}
         self.globalConfigs = {}
         self.ports = {}
+        self.vtp_mode = 'client'
         self.configScript = []
     
     def assignVlans(self, vlanList):
@@ -241,7 +242,7 @@ def writePortConfigs(deviceList):
         if device.dist_switch == True or device.access_switch == True:
             # Trunk congfigs for switches
             closedPortsScript = []
-            device.configScript += ['! TRUNKS AND CLOSE PORTS **************', 'config t']
+            device.configScript += ['! 3 TRUNKS AND CLOSE PORTS **************', 'config t']
             for key in device.ports:
                 if (key != 'hostname' and key != 'index'):
                     # Trunks
@@ -265,6 +266,18 @@ def writePortConfigs(deviceList):
             # Add usused port commands after trunks
             device.configScript += closedPortsScript
 
+            # vtp config
+            device.configScript += ['exit', '', '! 4 VTP SETUP **********',
+            'vtp domain ' + device.globalConfigs['VTP Domain'],
+            'vtp password ' + device.globalConfigs['VTP Password'],
+            'vtp mode ' + device.vtp_mode,
+            'vtp version 2', '']
+
+
+def writeVLANs(deviceList):
+    '''
+    Write VLAN configs on VTP server and configure accees switch vlans
+    '''
 
 if __name__ == '__main__':
     main()
